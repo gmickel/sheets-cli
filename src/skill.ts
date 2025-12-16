@@ -170,6 +170,9 @@ Errors:
 6. **Batch related operations** for atomicity
 7. **Column names match case-insensitively** with normalized whitespace
 8. **Header row auto-detects** - skips empty rows to find first data row
+9. **Headerless sheets:** \`read table\` returns columns as \`A\`, \`B\`, ...; use column letters for \`--set\` / \`--key-col\`
+10. **Empty sheets:** \`append\` can bootstrap by writing a header row from JSON keys
+11. **\`read table --range\`** accepts \`A1:Z\` (auto-prefixed with the sheet)
 
 ## Exit Codes
 

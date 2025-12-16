@@ -171,6 +171,12 @@ sheets-cli batch --ops '<json>' [--dry-run]
 {"PortCo": "Acme Corp", "Status": "Active", "Start Date": "2025-01-15"}
 ```
 
+Headerless sheets (column letters):
+
+```json
+{"A": "Acme Corp", "C": "Active"}
+```
+
 ### Set range (2D array)
 
 ```json
@@ -273,7 +279,10 @@ sheets-cli update key --sheet "Tasks" --key-col "ID" --key "TASK-42" --set '{"St
 5. **Batch related operations** for atomicity
 6. **Column names match case-insensitively** with normalized whitespace
 7. **Header row auto-detects**—skips empty rows to find first row with data
-8. **`--spreadsheet` accepts URLs**—paste full Google Sheets URL directly
+8. **Headerless sheets:** `read table` returns columns as `A`, `B`, ...; use column letters for `--set` / `--key-col`
+9. **Empty sheets:** `append` can bootstrap by writing a header row from JSON keys
+10. **`read table --range`** accepts `A1:Z` (auto-prefixed with the sheet)
+11. **`--spreadsheet` accepts URLs**—paste full Google Sheets URL directly
 
 <br>
 
