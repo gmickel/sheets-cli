@@ -1,0 +1,41 @@
+{
+  "name": "sheets-cli",
+  "module": "src/cli.ts",
+  "license": "MIT",
+  "author": "Gordon Mickel <gordon@mickel.tech>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gmickel/sheets-cli"
+  },
+  "bugs": {
+    "url": "https://github.com/gmickel/sheets-cli/issues"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@biomejs/biome": "2.3.8",
+    "@types/bun": "latest",
+    "lefthook": "^2.0.12",
+    "@typescript/native-preview": "^7.0.0-dev.20251215.1",
+    "ultracite": "6.4.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "bin": {
+    "sheets-cli": "./dist/sheets-cli"
+  },
+  "scripts": {
+    "prepare": "lefthook install",
+    "dev": "bun --hot ./src/cli.ts",
+    "build": "bun build ./src/cli.ts --compile --outfile ./dist/sheets-cli",
+    "build:deterministic": "bun build ./src/cli.ts --compile --no-compile-autoload-dotenv --no-compile-autoload-bunfig --outfile ./dist/sheets-cli",
+    "test": "bun test",
+    "lint": "biome check",
+    "lint:fix": "biome check --write",
+    "typecheck": "tsgo --noEmit"
+  },
+  "dependencies": {
+    "commander": "^14.0.2",
+    "googleapis": "^169.0.0"
+  }
+}

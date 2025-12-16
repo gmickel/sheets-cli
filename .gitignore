@@ -1,0 +1,79 @@
+# dependencies (bun install)
+node_modules
+
+# output
+out
+dist
+*.tgz
+
+# code coverage
+coverage
+*.lcov
+
+# logs
+logs
+_.log
+report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
+
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# caches
+.eslintcache
+.cache
+*.tsbuildinfo
+
+# IntelliJ based IDEs
+.idea
+
+# Finder (MacOS) folder config
+.DS_Store
+
+# Google OAuth credentials and tokens (sensitive)
+credentials.json
+token.json
+*.credentials.json
+*.token.json
+client_secret*.json
+oauth_client*.json
+client_id*.json
+.sheets-cli/
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+*.code-workspace
+
+# Editor backup files
+*~
+*.swp
+*.swo
+.#*
+\#*#
+
+# OS-specific files
+# Windows
+Thumbs.db
+desktop.ini
+ehthumbs.db
+$RECYCLE.BIN/
+
+# Linux
+.directory
+.Trash-*
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Bun cache
+.bun/
+
+# Biome cache (if any)
+.biome/

@@ -1,0 +1,300 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://em-content.zobj.net/source/apple/391/scroll_1f4dc.png">
+    <img alt="sheets-cli" src="https://em-content.zobj.net/source/apple/391/scroll_1f4dc.png" width="96">
+  </picture>
+</p>
+
+<h1 align="center">
+  sheets-cli
+</h1>
+
+<p align="center">
+  <strong>Composable Google Sheets primitives for humans and agents</strong>
+</p>
+
+<p align="center">
+  <a href="#installation">Installation</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#commands">Commands</a> •
+  <a href="#for-agents">For Agents</a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/bun-%23000000.svg?style=flat&logo=bun&logoColor=white" alt="Bun">
+  <img src="https://img.shields.io/badge/typescript-%23007ACC.svg?style=flat&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Google%20Sheets-34A853?style=flat&logo=google-sheets&logoColor=white" alt="Google Sheets">
+  <br>
+  <img src="https://img.shields.io/badge/Claude_Code-D97757?style=flat&logo=anthropic&logoColor=white" alt="Claude Code">
+  <img src="https://img.shields.io/badge/OpenAI_Codex-412991?style=flat&logo=openai&logoColor=white" alt="OpenAI Codex">
+</p>
+
+---
+
+Fast, deterministic CLI for Google Sheets. Read tables, append rows, update cells by key or index, batch operations—all with JSON output for programmatic consumption.
+
+```bash
+# Read a sheet as structured data
+sheets-cli read table --sheet "Projects" --limit 10
+
+# Update by key column (no fragile row indices)
+sheets-cli update key --sheet "Projects" --key-col "Name" --key "Acme" --set '{"Status":"Done"}'
+```
+
+<br>
+
+> **🆕 Agent Skills** — Install as a skill for [Claude Code](https://claude.ai/code) or [OpenAI Codex](https://openai.com/index/openai-codex/). The agent automatically discovers sheets-cli when you mention spreadsheets. See [For Agents](#for-agents).
+
+<br>
+
+## Installation
+
+**Prerequisites:** [Bun](https://bun.sh) runtime
+
+```bash
+git clone https://github.com/gmickel/sheets-cli.git
+cd sheets-cli
+bun install
+bun run build
+
+# Binary at ./dist/sheets-cli
+```
+
+<details>
+<summary><strong>Add to PATH</strong></summary>
+
+```bash
+# Symlink
+ln -s "$(pwd)/dist/sheets-cli" /usr/local/bin/sheets-cli
+
+# Or add to shell config
+echo 'export PATH="$PATH:/path/to/sheets-cli/dist"' >> ~/.zshrc
+```
+
+</details>
+
+<br>
+
+## Quick Start
+
+### 1. Enable APIs
+
+1. Go to [Google Cloud Console → APIs](https://console.cloud.google.com/apis/library)
+2. Enable **Google Sheets API**
+3. Enable **Google Drive API** (required for `sheets find` command)
+
+### 2. Create OAuth Credentials
+
+1. Go to [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials)
+2. Create **OAuth 2.0 Client ID** → Desktop app
+3. Download the JSON file
+
+> Desktop apps auto-allow localhost redirects. CLI captures OAuth code via `http://localhost:3847`.
+
+### 3. Authenticate
+
+```bash
+sheets-cli auth login --credentials ./client_secret.json
+```
+
+Browser opens → authorize → done.
+
+### 4. Use
+
+```bash
+sheets-cli sheets list
+sheets-cli read table --sheet "Sheet1" --limit 5
+sheets-cli append --sheet "Sheet1" --values '{"Name":"New Item","Status":"Active"}'
+```
+
+<br>
+
+## Commands
+
+### Auth
+
+```bash
+sheets-cli auth login --credentials <file> [--token-store <path>]
+sheets-cli auth status
+sheets-cli auth logout
+```
+
+### Metadata
+
+```bash
+sheets-cli sheets list [--spreadsheet <id>]
+sheets-cli sheets find --name "<query>" [--limit 10]  # Search by name
+sheets-cli sheet info --sheet "<name>" [--spreadsheet <id>]
+sheets-cli sheet info --gid <gid> [--spreadsheet <id>]
+sheets-cli header --sheet "<name>" [--header-row 1]
+```
+
+### Read
+
+```bash
+sheets-cli read table --sheet "<name>" [--limit 500] [--range "A1:Z500"] [--raw]
+sheets-cli read range --range "<sheet>!A1:Z50"
+```
+
+### Write
+
+```bash
+sheets-cli append --sheet "<name>" --values '<json>' [--value-input USER_ENTERED|RAW] [--dry-run]
+sheets-cli update row --sheet "<name>" --row 12 --set '<json>' [--dry-run]
+sheets-cli update key --sheet "<name>" --key-col "Col" --key "Val" --set '<json>' [--dry-run] [--allow-multi]
+sheets-cli set range --range "<sheet>!M2:M2" --values '<json_2d_array>' [--dry-run]
+sheets-cli batch --ops '<json>' [--dry-run]
+```
+
+<details>
+<summary><strong>All flags</strong></summary>
+
+| Flag | Description | Default |
+|:-----|:------------|:--------|
+| `--spreadsheet <id>` | Spreadsheet ID or full URL | Demo sheet |
+| `--dry-run` | Preview without applying | `false` |
+| `--value-input <mode>` | `USER_ENTERED` or `RAW` | `USER_ENTERED` |
+| `--header-row <n>` | Header row number | Auto-detect |
+| `--limit <n>` | Max rows to return | unlimited |
+| `--raw` | Return unformatted values | `false` |
+| `--allow-multi` | Update multiple matching rows | `false` |
+
+</details>
+
+<br>
+
+## JSON Formats
+
+### Append/Update values
+
+```json
+{"PortCo": "Acme Corp", "Status": "Active", "Start Date": "2025-01-15"}
+```
+
+### Set range (2D array)
+
+```json
+[["Value1", "Value2"], ["Value3", "Value4"]]
+```
+
+### Batch operations
+
+```json
+[
+  {"op": "append", "sheet": "Projects", "values": {"PortCo": "Acme"}},
+  {"op": "updateRow", "sheet": "Projects", "row": 5, "set": {"Status": "Done"}},
+  {"op": "updateKey", "sheet": "Projects", "keyCol": "PortCo", "key": "Beta", "set": {"Status": "Active"}},
+  {"op": "setRange", "range": "Projects!A1:B1", "values": [["Col1", "Col2"]]}
+]
+```
+
+<br>
+
+## Output Format
+
+All commands return JSON to stdout:
+
+```json
+{
+  "ok": true,
+  "cmd": "read table",
+  "spreadsheetId": "1abc...",
+  "sheet": "Projects",
+  "result": {
+    "headers": ["Name", "Status", "Date"],
+    "rows": [{"Name": "Alpha", "Status": "Active", "Date": "2025-01-15"}],
+    "headerRow": 1
+  }
+}
+```
+
+**Errors:**
+
+```json
+{
+  "ok": false,
+  "cmd": "update key",
+  "error": {"code": "VALIDATION_ERROR", "message": "...", "details": {}}
+}
+```
+
+### Exit Codes
+
+| Code | Meaning |
+|:-----|:--------|
+| `0` | Success |
+| `10` | Validation error |
+| `20` | Auth error |
+| `30` | Permission error |
+| `40` | API/transient error |
+
+<br>
+
+## For Agents
+
+### Install Skill
+
+```bash
+# Claude Code
+sheets-cli install-skill           # Project: ./.claude/skills/sheets-cli/SKILL.md
+sheets-cli install-skill --global  # Personal: ~/.claude/skills/sheets-cli/SKILL.md
+
+# OpenAI Codex
+sheets-cli install-skill --codex   # ~/.codex/skills/sheets-cli/SKILL.md
+```
+
+Installs an [Agent Skill](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview) that teaches the agent how to use sheets-cli. After installing, the agent automatically discovers sheets-cli when you mention spreadsheets, Google Sheets, or sheet names.
+
+> **Codex**: Requires `skills = true` in `~/.codex/config.toml` under `[features]`.
+
+**Restart the agent** after installing to load the skill.
+
+### Workflow Pattern
+
+Follow **read → decide → dry-run → apply**:
+
+```bash
+# 1. Understand current state
+sheets-cli read table --sheet "Tasks" --limit 100
+
+# 2. Dry-run
+sheets-cli update key --sheet "Tasks" --key-col "ID" --key "TASK-42" --set '{"Status":"Complete"}' --dry-run
+
+# 3. Apply
+sheets-cli update key --sheet "Tasks" --key-col "ID" --key "TASK-42" --set '{"Status":"Complete"}'
+```
+
+### Best Practices
+
+1. **Use `sheets find`** to get spreadsheet ID from name
+2. **Prefer key-based updates** over row indices—rows shift on insert/delete
+3. **Always dry-run** before writes
+4. **Check `ok` field** before proceeding
+5. **Batch related operations** for atomicity
+6. **Column names match case-insensitively** with normalized whitespace
+7. **Header row auto-detects**—skips empty rows to find first row with data
+8. **`--spreadsheet` accepts URLs**—paste full Google Sheets URL directly
+
+<br>
+
+## Development
+
+```bash
+bun run dev          # Hot-reload
+bun run build        # Compile binary
+bun run typecheck    # Type check
+bun run lint         # Lint
+bun run test         # Tests
+```
+
+<br>
+
+## License
+
+MIT
+
+---
+
+<p align="center">
+  <sub>Built with <a href="https://bun.sh">Bun</a> • Styled for machines and humans alike</sub>
+</p>

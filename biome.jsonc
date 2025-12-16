@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": ["ultracite/core"],
+  "javascript": {
+    "globals": ["Bun"]
+  },
+  "linter": {
+    "rules": {
+      "performance": {
+        "noNamespaceImport": "off"
+      },
+      "nursery": {
+        "useMaxParams": "off"
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": "off"
+      }
+    }
+  }
+}
