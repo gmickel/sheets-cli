@@ -7,6 +7,8 @@ description: Read, write, and update Google Sheets data via CLI. Use when the us
 
 CLI for Google Sheets primitives. Read tables, append rows, update cells by key or index, batch operations.
 
+> **Installation:** `sheets-cli` is already installed and available in the user's PATH. Run commands directly—no installation needed.
+
 ## Quick Reference
 
 ```bash

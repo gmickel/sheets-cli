@@ -4,6 +4,16 @@ globs: "*.ts, *.tsx, *.html, *.css, *.js, *.jsx, package.json"
 alwaysApply: false
 ---
 
+## Skill Sync
+
+```bash
+bun run build
+sheets-cli install-skill --global  # ~/.claude/skills/
+sheets-cli install-skill --codex   # ~/.codex/skills/
+```
+
+---
+
 Default to using Bun instead of Node.js.
 
 - Use `bun <file>` instead of `node <file>` or `ts-node <file>`
