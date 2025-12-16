@@ -1,5 +1,7 @@
-export const DEFAULT_SPREADSHEET_ID =
-  "1-831oQ6kGZmaTNnVBaeG3nUiBoF-dGwsJbjJzq4N93M";
+// Default spreadsheet ID from environment variable (user-specific, not committed to repo)
+// Set SHEETS_CLI_DEFAULT_SPREADSHEET_ID in your shell or .env file
+export const DEFAULT_SPREADSHEET_ID: string | undefined =
+  process.env.SHEETS_CLI_DEFAULT_SPREADSHEET_ID;
 
 // Parse Google Sheets URL to extract spreadsheet ID
 // Supports: https://docs.google.com/spreadsheets/d/ID/edit#gid=0

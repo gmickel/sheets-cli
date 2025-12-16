@@ -99,12 +99,21 @@ sheets-cli auth login --credentials ./client_secret.json
 
 Browser opens → authorize → done.
 
-### 4. Use
+### 4. Set Default Spreadsheet (optional)
 
 ```bash
-sheets-cli sheets list
-sheets-cli read table --sheet "Sheet1" --limit 5
-sheets-cli append --sheet "Sheet1" --values '{"Name":"New Item","Status":"Active"}'
+# Set env var to avoid passing --spreadsheet every time
+export SHEETS_CLI_DEFAULT_SPREADSHEET_ID="your-spreadsheet-id"
+```
+
+Get the ID from your sheet URL: `docs.google.com/spreadsheets/d/<ID>/edit`
+
+### 5. Use
+
+```bash
+sheets-cli sheets list --spreadsheet <id>
+sheets-cli read table --spreadsheet <id> --sheet "Sheet1" --limit 5
+sheets-cli append --spreadsheet <id> --sheet "Sheet1" --values '{"Name":"New Item","Status":"Active"}'
 ```
 
 <br>
@@ -151,7 +160,7 @@ sheets-cli batch --ops '<json>' [--dry-run]
 
 | Flag | Description | Default |
 |:-----|:------------|:--------|
-| `--spreadsheet <id>` | Spreadsheet ID or full URL | Demo sheet |
+| `--spreadsheet <id>` | Spreadsheet ID or full URL | env var or required |
 | `--dry-run` | Preview without applying | `false` |
 | `--value-input <mode>` | `USER_ENTERED` or `RAW` | `USER_ENTERED` |
 | `--header-row <n>` | Header row number | Auto-detect |
@@ -168,7 +177,7 @@ sheets-cli batch --ops '<json>' [--dry-run]
 ### Append/Update values
 
 ```json
-{"PortCo": "Acme Corp", "Status": "Active", "Start Date": "2025-01-15"}
+{"Name": "Acme Corp", "Status": "Active", "Start Date": "2025-01-15"}
 ```
 
 Headerless sheets (column letters):
@@ -187,10 +196,10 @@ Headerless sheets (column letters):
 
 ```json
 [
-  {"op": "append", "sheet": "Projects", "values": {"PortCo": "Acme"}},
-  {"op": "updateRow", "sheet": "Projects", "row": 5, "set": {"Status": "Done"}},
-  {"op": "updateKey", "sheet": "Projects", "keyCol": "PortCo", "key": "Beta", "set": {"Status": "Active"}},
-  {"op": "setRange", "range": "Projects!A1:B1", "values": [["Col1", "Col2"]]}
+  {"op": "append", "sheet": "Tasks", "values": {"Name": "New Task"}},
+  {"op": "updateRow", "sheet": "Tasks", "row": 5, "set": {"Status": "Done"}},
+  {"op": "updateKey", "sheet": "Tasks", "keyCol": "ID", "key": "TASK-123", "set": {"Status": "Active"}},
+  {"op": "setRange", "range": "Tasks!A1:B1", "values": [["Col1", "Col2"]]}
 ]
 ```
 

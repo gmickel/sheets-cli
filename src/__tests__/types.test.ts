@@ -3,31 +3,30 @@ import { DEFAULT_SPREADSHEET_ID, parseSpreadsheetId } from "../types";
 
 const SHEETS_ID_REGEX = /^[a-zA-Z0-9_-]+$/;
 
-describe("types", () => {
-  test("DEFAULT_SPREADSHEET_ID is defined", () => {
-    expect(DEFAULT_SPREADSHEET_ID).toBe(
-      "1-831oQ6kGZmaTNnVBaeG3nUiBoF-dGwsJbjJzq4N93M"
-    );
-  });
-
-  test("DEFAULT_SPREADSHEET_ID is a valid Google Sheets ID format", () => {
-    // Google Sheets IDs are alphanumeric with hyphens and underscores
-    expect(DEFAULT_SPREADSHEET_ID).toMatch(SHEETS_ID_REGEX);
+describe("DEFAULT_SPREADSHEET_ID", () => {
+  test("is undefined when env var not set", () => {
+    // DEFAULT_SPREADSHEET_ID comes from SHEETS_CLI_DEFAULT_SPREADSHEET_ID env var
+    // In test environment without env var set, it should be undefined
+    const envValue = process.env.SHEETS_CLI_DEFAULT_SPREADSHEET_ID;
+    if (envValue) {
+      expect(DEFAULT_SPREADSHEET_ID).toBe(envValue);
+      expect(DEFAULT_SPREADSHEET_ID).toMatch(SHEETS_ID_REGEX);
+    } else {
+      expect(DEFAULT_SPREADSHEET_ID).toBeUndefined();
+    }
   });
 });
 
 describe("parseSpreadsheetId", () => {
   test("returns ID as-is when given plain ID", () => {
-    const id = "1-831oQ6kGZmaTNnVBaeG3nUiBoF-dGwsJbjJzq4N93M";
+    const id = "abc123-XYZ_test-456";
     expect(parseSpreadsheetId(id)).toBe(id);
   });
 
   test("extracts ID from full Google Sheets URL", () => {
     const url =
-      "https://docs.google.com/spreadsheets/d/1-831oQ6kGZmaTNnVBaeG3nUiBoF-dGwsJbjJzq4N93M/edit#gid=0";
-    expect(parseSpreadsheetId(url)).toBe(
-      "1-831oQ6kGZmaTNnVBaeG3nUiBoF-dGwsJbjJzq4N93M"
-    );
+      "https://docs.google.com/spreadsheets/d/abc123-XYZ_test-456/edit#gid=0";
+    expect(parseSpreadsheetId(url)).toBe("abc123-XYZ_test-456");
   });
 
   test("extracts ID from URL without fragment", () => {

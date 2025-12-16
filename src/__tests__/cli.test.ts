@@ -131,8 +131,8 @@ describe("CLI", () => {
         "NonExistentSheet12345",
       ]);
 
-      // Returns AUTH_ERROR if not authenticated, API_ERROR if sheet not found
-      expect([0, 20, 40]).toContain(exitCode);
+      // Returns VALIDATION_ERROR (10) if no spreadsheet ID, AUTH_ERROR (20) if not authenticated, API_ERROR (40) if sheet not found
+      expect([0, 10, 20, 40]).toContain(exitCode);
       const output = parseOutput(stdout);
       expect(output).not.toBeNull();
     });
@@ -297,8 +297,8 @@ describe("CLI", () => {
     test("sheets list returns valid JSON", async () => {
       const { stdout, exitCode } = await runCli(["sheets", "list"]);
 
-      // Returns 0 if authenticated, 20 if not
-      expect([0, 20]).toContain(exitCode);
+      // Returns VALIDATION_ERROR (10) if no spreadsheet ID, AUTH_ERROR (20) if not authenticated, 0 if authenticated
+      expect([0, 10, 20]).toContain(exitCode);
       const output = parseOutput(stdout);
       expect(output).not.toBeNull();
     });
@@ -319,8 +319,8 @@ describe("CLI", () => {
         "NonExistentSheet12345",
       ]);
 
-      // Returns AUTH_ERROR if not authenticated, API_ERROR if sheet not found
-      expect([0, 20, 40]).toContain(exitCode);
+      // Returns VALIDATION_ERROR (10) if no spreadsheet ID, AUTH_ERROR (20) if not authenticated, API_ERROR (40) if sheet not found
+      expect([0, 10, 20, 40]).toContain(exitCode);
       const output = parseOutput(stdout);
       expect(output).not.toBeNull();
     });

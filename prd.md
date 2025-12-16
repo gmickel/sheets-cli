@@ -11,7 +11,7 @@ PRD (MVP): `gf-sheet` — Bun-compiled CLI for Google Sheets primitives
 
 Initial default target (but not hard-limited):
 
-* Default spreadsheetId: 1-831oQ6kGZmaTNnVBaeG3nUiBoF-dGwsJbjJzq4N93M
+* Default spreadsheetId: Set via `SHEETS_CLI_DEFAULT_SPREADSHEET_ID` env var (user-specific)
 
 2. Scope (MVP)
    Supported operations:
@@ -20,7 +20,7 @@ Initial default target (but not hard-limited):
 * metadata: list sheets/tabs, get header row, resolve gid→sheet name
 * read:
 
-  * read “table mode” (header + rows)
+  * read "table mode" (header + rows)
   * read raw ranges
 * write:
 
@@ -36,7 +36,7 @@ Initial default target (but not hard-limited):
 
 3. Non-goals (MVP)
 
-* Any “business logic” mapping from notes/projects into the sheet (the agent does this)
+* Any "business logic" mapping from notes/projects into the sheet (the agent does this)
 * Formatting, conditional formatting, filters, sheet structure changes
 * Multi-user approvals or workflow state machines
 * A persistent daemon/service
@@ -64,7 +64,7 @@ Write
 
 * gf-sheet append --sheet "<name>" --values '<json>' [--value-input USER_ENTERED|RAW] [--dry-run]
 * gf-sheet update row --sheet "<name>" --row 12 --set '<json>' [--dry-run]
-* gf-sheet update key --sheet "<name>" --key-col "PortCo" --key "eGroup" --set '<json>' [--dry-run] [--allow-multi]
+* gf-sheet update key --sheet "<name>" --key-col "Task ID" --key "TASK-123" --set '<json>' [--dry-run] [--allow-multi]
 * gf-sheet set range --range "<sheet>!M2:M2" --values '<json_2d_array>' [--dry-run]
 * gf-sheet batch --ops '<json>' [--dry-run]
 
@@ -72,30 +72,27 @@ Notes:
 
 * `append` and `batch` should use the Sheets Values endpoints (append/batchUpdate) for correctness and fewer API calls. ([Google for Developers][1])
 
-5. Data model assumptions for your tracker sheet (starting point)
-   Your header row (columns) is:
+5. Data model assumptions (example tracker sheet)
+   Example header row (columns):
 
-PortCo
-Project Name
-Project Type
-Project Subcategory
+Task ID
+Name
+Category
+Subcategory
 Start Date
 End Date
 Description
 Priority
 Impact
 Effort
-PoC Portco
-Deal Team
-Fee (Euro)
+Owner
+Team
+Budget
 Status
-Intro Call
+Notes
 Update 1
-1st Follow Up
 Update 2
 Update 3
-Update 4
-Update 5
 Outcome
 
 MVP behavior:
@@ -104,8 +101,8 @@ MVP behavior:
 * Append/update accept JSON objects keyed by these headers.
 * Dates can be sent as strings; with `USER_ENTERED` the sheet interprets them as user input. ([Google for Developers][2])
 
-6. “Not too limited” design
-   You want “edit anything and any sheet” long-term. The CLI should therefore support three tiers:
+6. "Not too limited" design
+   You want "edit anything and any sheet" long-term. The CLI should therefore support three tiers:
 
 Tier A: High-level table ops (preferred for agents)
 
@@ -131,7 +128,7 @@ Add a guard mode you can turn on when you want:
 * allowlists: spreadsheet IDs, sheets, writable columns
 * deny-by-default when enabled
 
-Reason: agentic tools will eventually issue surprising writes; guard mode prevents accidental corruption without blocking your “edit anything” requirement.
+Reason: agentic tools will eventually issue surprising writes; guard mode prevents accidental corruption without blocking your "edit anything" requirement.
 
 8. Output contract (machine-readable)
    stdout: JSON only.
@@ -185,10 +182,10 @@ Tests:
   * compute target A1 ranges for the columns being updated
   * perform one batchUpdate
 
-11. Recommended (but optional) “row identity” improvement
-    Key-based updates will be fragile if “PortCo” repeats or “Project Name” is blank. Consider adding a new column like:
+11. Recommended (but optional) "row identity" improvement
+    Key-based updates will be fragile if key columns have duplicates or blanks. Consider adding a column like:
 
-* GF_ID (immutable UUID-ish string)
+* ROW_ID (immutable UUID-ish string)
   Once present, agents can upsert/update deterministically.
 
 If you tell me the actual tab name that contains this header row (and whether header is row 1), I can produce:

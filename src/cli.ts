@@ -22,8 +22,21 @@ import { DEFAULT_SPREADSHEET_ID, parseSpreadsheetId } from "./types";
 const CLI_VERSION = "1.0.1";
 const program = new Command();
 
-// Helper to resolve spreadsheet from URL or ID
-function resolveSpreadsheet(input: string): string {
+// Helper to resolve spreadsheet from URL or ID, with validation
+function resolveSpreadsheet(
+  cmd: string,
+  input: string | undefined
+): string | null {
+  if (!input) {
+    output(
+      error(
+        cmd,
+        "VALIDATION_ERROR",
+        "Spreadsheet ID required. Use --spreadsheet <id> or set SHEETS_CLI_DEFAULT_SPREADSHEET_ID env var."
+      )
+    );
+    return null;
+  }
   return parseSpreadsheetId(input);
 }
 
@@ -118,7 +131,7 @@ program
 Spreadsheet ID:
   Most commands accept --spreadsheet <id> to specify the target.
   Get the ID from your sheet URL: docs.google.com/spreadsheets/d/<ID>/edit
-  Default: ${DEFAULT_SPREADSHEET_ID}`
+  Set SHEETS_CLI_DEFAULT_SPREADSHEET_ID env var to avoid passing --spreadsheet every time.`
   )
   .version(CLI_VERSION);
 
@@ -232,7 +245,10 @@ sheets
   .option("--spreadsheet <id>", "Spreadsheet ID or URL", DEFAULT_SPREADSHEET_ID)
   .action(async (opts) => {
     const cmd = "sheets list";
-    const spreadsheetId = resolveSpreadsheet(opts.spreadsheet);
+    const spreadsheetId = resolveSpreadsheet(cmd, opts.spreadsheet);
+    if (!spreadsheetId) {
+      return process.exit(10);
+    }
     const client = await getSheets(cmd);
     if (!client) {
       return process.exit(20);
@@ -311,7 +327,10 @@ program
   .option("--gid <gid>", "Sheet GID")
   .action(async (opts) => {
     const cmd = "sheet info";
-    const spreadsheetId = resolveSpreadsheet(opts.spreadsheet);
+    const spreadsheetId = resolveSpreadsheet(cmd, opts.spreadsheet);
+    if (!spreadsheetId) {
+      return process.exit(10);
+    }
     const client = await getSheets(cmd);
     if (!client) {
       return process.exit(20);
@@ -370,7 +389,10 @@ program
   .option("--header-row <row>", "Header row number (auto-detect if omitted)")
   .action(async (opts) => {
     const cmd = "header";
-    const spreadsheetId = resolveSpreadsheet(opts.spreadsheet);
+    const spreadsheetId = resolveSpreadsheet(cmd, opts.spreadsheet);
+    if (!spreadsheetId) {
+      return process.exit(10);
+    }
     const client = await getSheets(cmd);
     if (!client) {
       return process.exit(20);
@@ -419,7 +441,10 @@ read
   .option("--raw", "Return unformatted values")
   .action(async (opts) => {
     const cmd = "read table";
-    const spreadsheetId = resolveSpreadsheet(opts.spreadsheet);
+    const spreadsheetId = resolveSpreadsheet(cmd, opts.spreadsheet);
+    if (!spreadsheetId) {
+      return process.exit(10);
+    }
     const client = await getSheets(cmd);
     if (!client) {
       return process.exit(20);
@@ -462,7 +487,10 @@ read
   .requiredOption("--range <range>", "A1 range (e.g., Sheet1!A1:B10)")
   .action(async (opts) => {
     const cmd = "read range";
-    const spreadsheetId = resolveSpreadsheet(opts.spreadsheet);
+    const spreadsheetId = resolveSpreadsheet(cmd, opts.spreadsheet);
+    if (!spreadsheetId) {
+      return process.exit(10);
+    }
     const client = await getSheets(cmd);
     if (!client) {
       return process.exit(20);
@@ -491,7 +519,10 @@ program
   .option("--dry-run", "Preview changes without applying")
   .action(async (opts) => {
     const cmd = "append";
-    const spreadsheetId = resolveSpreadsheet(opts.spreadsheet);
+    const spreadsheetId = resolveSpreadsheet(cmd, opts.spreadsheet);
+    if (!spreadsheetId) {
+      return process.exit(10);
+    }
     const client = await getSheets(cmd);
     if (!client) {
       return process.exit(20);
@@ -550,7 +581,10 @@ update
   .option("--dry-run", "Preview changes without applying")
   .action(async (opts) => {
     const cmd = "update row";
-    const spreadsheetId = resolveSpreadsheet(opts.spreadsheet);
+    const spreadsheetId = resolveSpreadsheet(cmd, opts.spreadsheet);
+    if (!spreadsheetId) {
+      return process.exit(10);
+    }
     const client = await getSheets(cmd);
     if (!client) {
       return process.exit(20);
@@ -614,7 +648,10 @@ update
   .option("--dry-run", "Preview changes without applying")
   .action(async (opts) => {
     const cmd = "update key";
-    const spreadsheetId = resolveSpreadsheet(opts.spreadsheet);
+    const spreadsheetId = resolveSpreadsheet(cmd, opts.spreadsheet);
+    if (!spreadsheetId) {
+      return process.exit(10);
+    }
     const client = await getSheets(cmd);
     if (!client) {
       return process.exit(20);
@@ -673,7 +710,10 @@ program
   .option("--dry-run", "Preview changes without applying")
   .action(async (opts) => {
     const cmd = "set range";
-    const spreadsheetId = resolveSpreadsheet(opts.spreadsheet);
+    const spreadsheetId = resolveSpreadsheet(cmd, opts.spreadsheet);
+    if (!spreadsheetId) {
+      return process.exit(10);
+    }
     const client = await getSheets(cmd);
     if (!client) {
       return process.exit(20);
@@ -720,7 +760,10 @@ program
   .option("--dry-run", "Preview changes without applying")
   .action(async (opts) => {
     const cmd = "batch";
-    const spreadsheetId = resolveSpreadsheet(opts.spreadsheet);
+    const spreadsheetId = resolveSpreadsheet(cmd, opts.spreadsheet);
+    if (!spreadsheetId) {
+      return process.exit(10);
+    }
     const client = await getSheets(cmd);
     if (!client) {
       return process.exit(20);
