@@ -31,6 +31,10 @@
 
 ---
 
+> **📢 New Project:** Check out [**GNO**](https://gno.sh) — local hybrid search for your documents (Markdown, PDF, Word, Excel). Combines BM25 + vector search with MCP integration for AI agents. Great companion to sheets-cli: search your local docs, query your cloud sheets.
+
+---
+
 Fast, deterministic CLI for Google Sheets. Read tables, append rows, update cells by key or index, batch operations—all with JSON output for programmatic consumption.
 
 ```bash
