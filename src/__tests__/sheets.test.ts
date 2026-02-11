@@ -341,6 +341,76 @@ describe("sheets API functions", () => {
       expect(result.dryRun).toBe(true);
       expect(mockSheets.spreadsheets.values.append).not.toHaveBeenCalled();
     });
+
+    test("does not treat header names like ID/URL as column letters", async () => {
+      const mockSheets = createMockSheets();
+
+      mockSheets.spreadsheets.values.get = mock(() =>
+        Promise.resolve({
+          data: {
+            values: [["ID", "URL", "Status", "Company", "Position", "Source"]],
+          },
+        })
+      );
+
+      await appendRows(
+        mockSheets as never,
+        "spreadsheet-id",
+        "Sheet1",
+        {
+          ID: "25",
+          URL: "https://example.com",
+          Status: "2do",
+          Company: "Test",
+          Position: "",
+          Source: "Web",
+        },
+        { dryRun: true }
+      );
+
+      // Verify append was not called (dry-run), but check the row would
+      // only span 6 columns (A-F), not 238 (A-ID)
+      const calls = mockSheets.spreadsheets.values.append.mock.calls;
+      expect(calls).toHaveLength(0); // dry-run skips API call
+
+      // Run without dry-run to verify the actual row sent
+      const mockSheets2 = createMockSheets();
+      mockSheets2.spreadsheets.values.get = mock(() =>
+        Promise.resolve({
+          data: {
+            values: [["ID", "URL", "Status", "Company", "Position", "Source"]],
+          },
+        })
+      );
+
+      await appendRows(
+        mockSheets2 as never,
+        "spreadsheet-id",
+        "Sheet1",
+        {
+          ID: "25",
+          URL: "https://example.com",
+          Status: "2do",
+          Company: "Test",
+          Position: "",
+          Source: "Web",
+        },
+        {}
+      );
+
+      const appendCalls = mockSheets2.spreadsheets.values.append.mock.calls;
+      expect(appendCalls).toHaveLength(1);
+      const body = appendCalls[0][0].requestBody;
+      expect(body.values[0]).toHaveLength(6);
+      expect(body.values[0]).toEqual([
+        "25",
+        "https://example.com",
+        "2do",
+        "Test",
+        "",
+        "Web",
+      ]);
+    });
   });
 
   describe("updateByRowIndex", async () => {
@@ -365,6 +435,29 @@ describe("sheets API functions", () => {
       expect(result.updatedCells).toBe(1);
       expect(result.dryRun).toBe(false);
       expect(mockSheets.spreadsheets.values.batchUpdate).toHaveBeenCalled();
+    });
+
+    test("treats ID header as header name not column letter", async () => {
+      const mockSheets = createMockSheets();
+
+      mockSheets.spreadsheets.values.get = mock(() =>
+        Promise.resolve({ data: { values: [["ID", "Status"]] } })
+      );
+
+      const result = await updateByRowIndex(
+        mockSheets as never,
+        "spreadsheet-id",
+        "Sheet1",
+        5,
+        { ID: "42" },
+        {}
+      );
+
+      expect(result.updatedCells).toBe(1);
+      const calls = mockSheets.spreadsheets.values.batchUpdate.mock.calls;
+      const data = calls[0][0].requestBody.data;
+      // Should target column A (where ID header is), not column ID (238)
+      expect(data[0].range).toBe("'Sheet1'!A5");
     });
 
     test("skips unknown columns", async () => {

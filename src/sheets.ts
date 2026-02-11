@@ -411,9 +411,12 @@ export async function appendRows(
 
   const normalizedKeyToValue = new Map<string, unknown>();
   const colNumberToValue = new Map<number, unknown>();
+  const headerNorms = layout.hasHeader
+    ? new Set(layout.rawHeaders.map((h) => normalizeHeader(h)))
+    : null;
   for (const [key, val] of Object.entries(values)) {
     normalizedKeyToValue.set(normalizeHeader(key), val);
-    if (isColumnLetter(key)) {
+    if (isColumnLetter(key) && !headerNorms?.has(normalizeHeader(key))) {
       const colNum = colLetterToNumber(key);
       if (Number.isFinite(colNum)) {
         colNumberToValue.set(colNum, val);
@@ -543,15 +546,16 @@ export async function updateByRowIndex(
 
   for (const [key, val] of Object.entries(setValues)) {
     let colNum: number | null = null;
-    if (isColumnLetter(key)) {
-      const parsed = colLetterToNumber(key);
-      colNum = Number.isFinite(parsed) ? parsed : null;
-    } else if (layout.hasHeader) {
+    if (layout.hasHeader) {
       const normalizedKey = normalizeHeader(key);
       const colIdx = layout.rawHeaders.findIndex(
         (h) => normalizeHeader(h) === normalizedKey
       );
       colNum = colIdx === -1 ? null : layout.startCol + colIdx;
+    }
+    if (colNum === null && isColumnLetter(key)) {
+      const parsed = colLetterToNumber(key);
+      colNum = Number.isFinite(parsed) ? parsed : null;
     }
 
     if (!colNum) {
@@ -617,15 +621,16 @@ export async function updateByKey(
   );
 
   let keyColNum: number | null = null;
-  if (isColumnLetter(keyCol)) {
-    const parsed = colLetterToNumber(keyCol);
-    keyColNum = Number.isFinite(parsed) ? parsed : null;
-  } else if (layout.hasHeader) {
+  if (layout.hasHeader) {
     const normalizedKeyCol = normalizeHeader(keyCol);
     const keyColIdx = layout.rawHeaders.findIndex(
       (h) => normalizeHeader(h) === normalizedKeyCol
     );
     keyColNum = keyColIdx === -1 ? null : layout.startCol + keyColIdx;
+  }
+  if (keyColNum === null && isColumnLetter(keyCol)) {
+    const parsed = colLetterToNumber(keyCol);
+    keyColNum = Number.isFinite(parsed) ? parsed : null;
   }
 
   if (!keyColNum) {
@@ -671,15 +676,16 @@ export async function updateByKey(
   for (const rowNum of matchingRows) {
     for (const [key, val] of Object.entries(setValues)) {
       let colNum: number | null = null;
-      if (isColumnLetter(key)) {
-        const parsed = colLetterToNumber(key);
-        colNum = Number.isFinite(parsed) ? parsed : null;
-      } else if (layout.hasHeader) {
+      if (layout.hasHeader) {
         const normalizedKey = normalizeHeader(key);
         const colIdx = layout.rawHeaders.findIndex(
           (h) => normalizeHeader(h) === normalizedKey
         );
         colNum = colIdx === -1 ? null : layout.startCol + colIdx;
+      }
+      if (colNum === null && isColumnLetter(key)) {
+        const parsed = colLetterToNumber(key);
+        colNum = Number.isFinite(parsed) ? parsed : null;
       }
 
       if (!colNum) {
