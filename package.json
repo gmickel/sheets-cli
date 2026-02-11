@@ -1,6 +1,6 @@
 {
   "name": "sheets-cli",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "module": "src/cli.ts",
   "license": "MIT",
   "author": "Gordon Mickel <gordon@mickel.tech>",
